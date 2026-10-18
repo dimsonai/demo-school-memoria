@@ -11,6 +11,9 @@
 # runtime uploads (user photos/videos live on the server, not in git)
 /uploads/
 
+# generated download archive
+/public/download/
+
 # environment secrets — never commit these
 .env
 .env*.local

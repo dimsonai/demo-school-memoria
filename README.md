@@ -44,3 +44,19 @@
 - Загруженные файлы — в папку `uploads/` на сервере, раздаются через `/api/files/...`
 - Метаданные (альбомы, воспоминания, комментарии, пожелания) — в PostgreSQL
 - Для облачного деплоя (Vercel и т.п.) файловое хранилище стоит перенести в S3/Cloudinary/Vercel Blob
+
+## Публикация в интернет (постоянная ссылка)
+
+1. Создайте бесплатную базу PostgreSQL на [neon.tech](https://neon.tech) → New Project → скопируйте строку подключения (вида `postgresql://user:pass@host/db?sslmode=require`).
+2. Залейте схему в облачную базу:
+   ```bash
+   # подставьте свою строку подключения из Neon
+   # Windows (cmd):  set DATABASE_URL=postgresql://...
+   # Mac/Linux:      export DATABASE_URL="postgresql://..."
+   npx drizzle-kit push --config=drizzle.config.production.ts
+   ```
+3. Опубликуйте код на GitHub (см. историю коммитов — репозиторий готов).
+4. На [vercel.com](https://vercel.com): Sign up with GitHub → Add New → Project → выберите репозиторий → в **Environment Variables** добавьте `DATABASE_URL` (та же строка из Neon) → **Deploy**.
+5. Через минуту сайт будет доступен по постоянной ссылке вида `https://ваш-проект.vercel.app`. Свой домен подключается в Settings → Domains.
+
+> Важно: на бессерверном хостинге (Vercel) локальный диск временный, поэтому загрузку фото нужно переключить на облачное хранилище (Vercel Blob / Cloudinary) — иначе новые фото не сохранятся.
