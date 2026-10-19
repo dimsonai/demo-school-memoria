@@ -1,6 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { memories } from "@/db/schema";
@@ -9,11 +7,11 @@ import { getMemories } from "@/lib/data";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"]);
 const VIDEO_EXT = new Set([".mp4", ".webm", ".mov", ".m4v", ".ogv"]);
-const MAX_FILE_SIZE = 600 * 1024 * 1024; // 600 MB
-const MAX_FILES = 30;
+// Лимит 4.5 МБ для надежной работы на бесплатном Netlify
+const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
+const MAX_FILES = 10;
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
@@ -48,8 +46,6 @@ export async function POST(req: NextRequest) {
     const albumIdNum = albumIdRaw ? Number(albumIdRaw) : NaN;
     const albumId = Number.isFinite(albumIdNum) && albumIdNum > 0 ? albumIdNum : null;
 
-    await mkdir(UPLOAD_DIR, { recursive: true });
-
     const saved = [];
     const skipped: string[] = [];
 
@@ -59,7 +55,6 @@ export async function POST(req: NextRequest) {
       let isVideo = mime.startsWith("video/");
       let isImage = mime.startsWith("image/");
       if (!isVideo && !isImage) {
-        // some clients send octet-stream — fall back to the extension
         if (VIDEO_EXT.has(origExt)) isVideo = true;
         else if (IMAGE_EXT.has(origExt)) isImage = true;
       }
@@ -73,16 +68,26 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      const allowed = isVideo ? VIDEO_EXT : IMAGE_EXT;
-      const ext = allowed.has(origExt) ? origExt : isVideo ? ".mp4" : ".jpg";
-      const filename = `${Date.now().toString(36)}-${crypto.randomUUID()}${ext}`;
-      await writeFile(path.join(UPLOAD_DIR, filename), buf);
+      // Сохраняем файл прямо в базу Neon как Data URL
+      let mimeType = mime;
+      if (!mimeType || mimeType === "application/octet-stream") {
+        if (isVideo) {
+          mimeType = origExt === ".webm" ? "video/webm" : "video/mp4";
+        } else {
+          if (origExt === ".png") mimeType = "image/png";
+          else if (origExt === ".webp") mimeType = "image/webp";
+          else if (origExt === ".gif") mimeType = "image/gif";
+          else mimeType = "image/jpeg";
+        }
+      }
+      const base64 = buf.toString("base64");
+      const dataUrl = `data:${mimeType};base64,${base64}`;
 
       const [row] = await db
         .insert(memories)
         .values({
           type: isVideo ? "video" : "photo",
-          filePath: `/api/files/${filename}`,
+          filePath: dataUrl,
           fileName: (file.name || "").slice(0, 180) || null,
           size: buf.length,
           author,
