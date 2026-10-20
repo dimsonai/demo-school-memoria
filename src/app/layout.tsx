@@ -1,31 +1,29 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Playfair_Display, Inter, Caveat } from "next/font/google";
 import "./globals.css";
-import BackdropFX from "@/components/BackdropFX";
-import Footer from "@/components/Footer";
-import MusicPlayer from "@/components/MusicPlayer";
 import Navbar from "@/components/Navbar";
-import Snowfall from "@/components/Snowfall";
-import UploadProvider from "@/components/UploadProvider";
+import Footer from "@/components/Footer";
+
+const playfair = Playfair_Display({ subsets: ["cyrillic"], variable: "--font-serif" });
+const inter = Inter({ subsets: ["cyrillic"], variable: "--font-sans" });
+const caveat = Caveat({ subsets: ["cyrillic"], variable: "--font-handwritten" });
 
 export const metadata: Metadata = {
-  title: "Снегопад — наши новогодние воспоминания",
-  description:
-    "Уютное хранилище фотографий и видео для нас и наших друзей: альбомы, галерея и пожелания на Новый год.",
+  title: "Выпускной 2027 | 11 «А» класс",
+  description: "Школьный альбом класса. Фото, пожелания и воспоминания.",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="ru">
-      <body className="grain font-sans min-h-screen antialiased">
-        <BackdropFX />
-        <Snowfall />
-        <UploadProvider>
-          <Navbar />
-          <main className="relative z-10">{children}</main>
-          <Footer />
-          <MusicPlayer />
-        </UploadProvider>
+    <html lang="ru" className={`${playfair.variable} ${inter.variable} ${caveat.variable}`}>
+      <body className="font-sans bg-[var(--background)] text-[var(--foreground)] flex flex-col min-h-screen">
+        <Navbar />
+        <div className="flex-grow">{children}</div>
+        <Footer />
       </body>
     </html>
   );
