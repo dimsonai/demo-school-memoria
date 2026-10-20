@@ -1,335 +1,162 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  Camera,
-  Clock,
-  Film,
-  Layers,
-  Images,
-  Quote,
-  Snowflake,
-  Sparkles,
-  Upload,
-} from "lucide-react";
 import Countdown from "@/components/Countdown";
-import MemoryGrid from "@/components/MemoryGrid";
-import Reveal from "@/components/Reveal";
-import UploadCTA from "@/components/UploadCTA";
-import WishCard from "@/components/WishCard";
-import { getAlbumsWithStats, getLatestMemories, getStats, getWishes } from "@/lib/data";
-import { plural } from "@/lib/utils";
-import type { ReactNode } from "react";
+import { getMemories, getWishes } from "@/lib/data";
+import { GraduationCap, School, BookOpen, Users, Award, Star } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-function SectionHead({
-  kicker,
-  title,
-  href,
-  linkText,
-}: {
-  kicker: string;
-  title: ReactNode;
-  href?: string;
-  linkText?: string;
-}) {
-  return (
-    <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <p className="section-kicker">
-          <Snowflake size={13} />
-          {kicker}
-        </p>
-        <h2 className="font-display mt-3 text-3xl font-bold text-white sm:text-4xl">{title}</h2>
-      </div>
-      {href && linkText && (
-        <Link
-          href={href}
-          className="group inline-flex items-center gap-2 text-sm font-semibold text-gold-300 transition hover:text-gold-400"
-        >
-          {linkText}
-          <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-        </Link>
-      )}
-    </div>
-  );
-}
-
-function StatCard({
-  icon,
-  value,
-  label,
-  delay,
-}: {
-  icon: ReactNode;
-  value: number;
-  label: string;
-  delay: number;
-}) {
-  return (
-    <Reveal delay={delay}>
-      <div className="glass-panel group flex items-center gap-4 rounded-3xl px-6 py-5 transition-transform duration-500 hover:-translate-y-1">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-gold-400/30 bg-gold-400/10 text-gold-300 transition-transform duration-500 group-hover:scale-110">
-          {icon}
-        </span>
-        <div>
-          <p className="font-display text-3xl font-bold tabular-nums text-white">{value}</p>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300/60">
-            {label}
-          </p>
-        </div>
-      </div>
-    </Reveal>
-  );
-}
-
 export default async function HomePage() {
-  const [stats, latest, albums, wishes] = await Promise.all([
-    getStats(),
-    getLatestMemories(8),
-    getAlbumsWithStats(),
-    getWishes(3),
-  ]);
+  let memories = [];
+  let wishes = [];
 
-  const heroPhotos = latest.filter((m) => m.type === "photo").slice(0, 2);
+  try {
+    const [mRes, wRes] = await Promise.all([
+      getMemories({ limit: 6 }),
+      getWishes(),
+    ]);
+    memories = mRes || [];
+    wishes = wRes || [];
+  } catch (e) {
+    console.error("DB error:", e);
+  }
+
+  const stats = [
+    { icon: Users, label: "Учеников", value: "27" },
+    { icon: BookOpen, label: "Лет вместе", value: "11" },
+    { icon: Award, label: "Побед", value: "48" },
+    { icon: Star, label: "Воспоминаний", value: memories.length > 0 ? `${memories.length}+` : "∞" },
+  ];
 
   return (
-    <div>
-      {/* ============ HERO ============ */}
-      <section className="relative overflow-hidden">
-        {/* floating memories */}
-        {heroPhotos[0] && (
-          <div
-            className="pointer-events-none absolute left-[3%] top-32 hidden w-52 rotate-[-7deg] xl:block"
-            style={{ animation: "floaty 7s ease-in-out infinite", ["--fl-rot" as string]: "-7deg" }}
-          >
-            <div className="frost-card overflow-hidden rounded-2xl p-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={heroPhotos[0].filePath} alt="" className="aspect-[3/4] w-full rounded-xl object-cover" />
-            </div>
-          </div>
-        )}
-        {heroPhotos[1] && (
-          <div
-            className="pointer-events-none absolute right-[3%] top-40 hidden w-52 rotate-[6deg] xl:block"
-            style={{ animation: "floaty 8s ease-in-out 1.2s infinite", ["--fl-rot" as string]: "6deg" }}
-          >
-            <div className="frost-card overflow-hidden rounded-2xl p-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={heroPhotos[1].filePath} alt="" className="aspect-[3/4] w-full rounded-xl object-cover" />
-            </div>
-          </div>
-        )}
+    <main className="min-h-screen relative pb-20">
+      
+      {/* ЗАГОЛОВОК */}
+      <section className="pt-16 pb-12 px-4 text-center max-w-5xl mx-auto animate-fade-in">
+        <div className="inline-flex items-center gap-2 bg-[#e6f4ea] text-[#276749] px-4 py-1.5 rounded-full text-xs uppercase tracking-widest font-semibold mb-6">
+          <GraduationCap className="w-4 h-4" /> Выпуск 2027
+        </div>
+        
+        <h1 className="text-5xl sm:text-7xl font-serif text-[#1a365d] mb-4 tracking-tight">
+          11 «А» класс
+        </h1>
+        <p className="text-xl text-[#4a5568] mb-2">Школа №3 города Севастополя</p>
+        <p className="text-md text-[#718096] italic font-light mb-10">
+          «Мы вместе 11 лет. Это наша история — от первого звонка до выпускного вальса»
+        </p>
 
-        <div className="mx-auto flex max-w-4xl flex-col items-center px-4 pb-24 pt-28 text-center sm:pt-36">
-          <Reveal>
-            <p className="section-kicker justify-center">
-              <Sparkles size={14} />
-              Только для наших · закрытый архив дружбы
-            </p>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <h1 className="font-display mt-6 text-5xl font-bold leading-[1.05] text-white sm:text-7xl">
-              Воспоминания,
-              <br />
-              которые <span className="gold-text">не растают</span>
-            </h1>
-          </Reveal>
-          <Reveal delay={0.2}>
-            <p className="mt-7 max-w-2xl text-base leading-relaxed text-slate-300/85 sm:text-lg">
-              Загружайте фотографии и видео, собирайте альбомы и оставляйте друг другу
-              пожелания — наша общая новогодняя история хранится здесь, под мягким снегопадом.
-            </p>
-          </Reveal>
-          <Reveal delay={0.3}>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <UploadCTA>
-                <Upload size={18} strokeWidth={2.5} />
-                Загрузить воспоминания
-              </UploadCTA>
-              <Link href="/gallery" className="btn-ghost">
-                <Images size={18} />
-                Смотреть галерею
-              </Link>
-            </div>
-          </Reveal>
+        {/* Таймер */}
+        <div className="paper-card inline-block px-10 py-6 mb-10">
+          <p className="text-xs uppercase tracking-widest text-[#2c5282] mb-3 font-bold">
+            🎓 До выпускного осталось:
+          </p>
+          <Countdown targetDate="2027-06-25T18:00:00" />
+        </div>
+
+        {/* Кнопки */}
+        <div className="flex flex-wrap justify-center gap-4">
+          <Link href="/gallery" className="bg-[#2c5282] hover:bg-[#1a365d] text-white px-6 py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all text-sm">
+            📸 Фотоархив класса
+          </Link>
+          <Link href="/wishes" className="bg-white border border-[#2c5282] text-[#2c5282] hover:bg-[#f0f4f8] px-6 py-3 rounded-lg font-medium transition-all text-sm">
+            ✍️ Оставить запись в альбоме
+          </Link>
         </div>
       </section>
 
-      {/* ============ COUNTDOWN ============ */}
-      <section className="mx-auto max-w-5xl px-4">
-        <Reveal>
-          <div className="frost-card relative overflow-hidden rounded-[2rem] px-6 py-12 text-center sm:px-12">
-            <Clock size={120} className="absolute -left-8 -top-8 text-gold-400/[0.07]" aria-hidden />
-            <Snowflake
-              size={150}
-              className="absolute -bottom-10 -right-10 text-gold-400/[0.07]"
-              style={{ animation: "spin-slow 24s linear infinite" }}
-              aria-hidden
-            />
-            <p className="section-kicker justify-center">
-              <Sparkles size={13} />
-              Совсем скоро
-            </p>
-            <h2 className="font-display mb-9 mt-3 text-3xl font-bold text-white sm:text-4xl">
-              До <span className="gold-text">Нового года</span> осталось
-            </h2>
-            <Countdown />
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ============ STATS ============ */}
-      <section className="mx-auto mt-14 max-w-6xl px-4">
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard icon={<Camera size={20} />} value={stats.photos} label={plural(stats.photos, "фотография", "фотографии", "фотографий")} delay={0} />
-          <StatCard icon={<Film size={20} />} value={stats.videos} label={plural(stats.videos, "видео", "видео", "видео")} delay={0.08} />
-          <StatCard icon={<Layers size={20} />} value={stats.albums} label={plural(stats.albums, "альбом", "альбома", "альбомов")} delay={0.16} />
-          <StatCard icon={<Quote size={20} />} value={stats.wishes} label={plural(stats.wishes, "пожелание", "пожелания", "пожеланий")} delay={0.24} />
+      {/* СТАТИСТИКА */}
+      <section className="max-w-5xl mx-auto px-4 my-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((s, i) => (
+            <div key={i} className="paper-card text-center p-6">
+              <s.icon className="w-7 h-7 text-[#2c5282] mx-auto mb-2" />
+              <div className="text-3xl font-bold text-[#1a365d] font-serif">{s.value}</div>
+              <div className="text-xs uppercase tracking-wider text-[#718096] mt-1">{s.label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ============ RECENT ============ */}
-      <section className="mx-auto mt-24 max-w-7xl px-4">
-        <Reveal>
-          <SectionHead
-            kicker="Свежее в архиве"
-            title={
-              <>
-                Последние <span className="gold-text">моменты</span>
-              </>
-            }
-            href="/gallery"
-            linkText="Вся галерея"
-          />
-        </Reveal>
-        <Reveal delay={0.1}>
-          <MemoryGrid memories={latest} />
-        </Reveal>
+      {/* ШКОЛЬНАЯ ДОСКА С ПРИВЕТСТВИЕМ */}
+      <section className="max-w-4xl mx-auto px-4 my-16">
+        <div className="blackboard text-center">
+          <p className="chalk-text text-2xl mb-4">✨ Дорогие одноклассники! ✨</p>
+          <p className="chalk-text text-base leading-relaxed max-w-2xl mx-auto">
+            Здесь мы собираем самые тёплые моменты наших школьных лет. 
+            Загружайте фото с уроков, походов, конкурсов и праздников. 
+            Пишите пожелания друг другу — они останутся в нашем классе навсегда.
+          </p>
+          <p className="chalk-text text-sm mt-6 opacity-80">— Ваш классный руководитель</p>
+        </div>
       </section>
 
-      {/* ============ ALBUMS ============ */}
-      {albums.length > 0 && (
-        <section className="mx-auto mt-24 max-w-7xl px-4">
-          <Reveal>
-            <SectionHead
-              kicker="Наши истории"
-              title={
-                <>
-                  Альбомы <span className="gold-text">с характером</span>
-                </>
-              }
-              href="/albums"
-              linkText="Все альбомы"
-            />
-          </Reveal>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {albums.slice(0, 3).map((a, i) => (
-              <Reveal key={a.id} delay={i * 0.08}>
-                <Link
-                  href={`/albums/${a.id}`}
-                  className="frost-card group relative block overflow-hidden rounded-3xl"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    {a.coverPath ? (
-                      a.coverType === "video" ? (
-                        <video
-                          src={a.coverPath}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-                        />
-                      ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={a.coverPath}
-                          alt={a.title}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-                        />
-                      )
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-night-800 to-night-900">
-                        <Layers size={40} className="text-gold-400/50" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#03060f]/95 via-[#03060f]/20 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-5">
-                      <p className="text-[0.65rem] font-bold uppercase tracking-[0.25em] text-gold-400/90">
-                        {a.count} {plural(a.count, "воспоминание", "воспоминания", "воспоминаний")}
-                      </p>
-                      <h3 className="font-display mt-1.5 text-2xl font-bold text-white transition-colors group-hover:text-gold-300">
-                        {a.title}
-                      </h3>
-                    </div>
-                  </div>
-                </Link>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ============ WISHES ============ */}
-      {wishes.length > 0 && (
-        <section className="mx-auto mt-24 max-w-7xl px-4">
-          <Reveal>
-            <SectionHead
-              kicker="Тепло слов"
-              title={
-                <>
-                  Пожелания на <span className="gold-text">Новый год</span>
-                </>
-              }
-              href="/wishes"
-              linkText="Вся стена"
-            />
-          </Reveal>
-          <div className="grid gap-6 md:grid-cols-3">
-            {wishes.map((w, i) => (
-              <Reveal key={w.id} delay={i * 0.08}>
-                <WishCard wish={w} />
-              </Reveal>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ============ FINAL CTA ============ */}
-      <section className="mx-auto mt-28 max-w-5xl px-4">
-        <Reveal>
-          <div className="frost-card relative overflow-hidden rounded-[2.5rem] px-6 py-16 text-center sm:px-16">
-            <div
-              className="absolute inset-0 opacity-40"
-              style={{
-                background:
-                  "radial-gradient(600px 300px at 50% 120%, rgba(245,201,107,0.25), transparent 70%)",
-              }}
-            />
-            <div className="relative">
-              <Snowflake
-                size={40}
-                className="mx-auto text-gold-300"
-                style={{ animation: "spin-slow 18s linear infinite" }}
-              />
-              <h2 className="font-display mx-auto mt-6 max-w-2xl text-3xl font-bold leading-tight text-white sm:text-5xl">
-                Добавь свою частичку <span className="gold-text">волшебства</span>
-              </h2>
-              <p className="mx-auto mt-5 max-w-xl text-slate-300/80">
-                Каждый кадр, каждое видео и каждое пожелание делают этот архив теплее.
-                Поделитесь моментом — через годы мы скажем себе спасибо.
-              </p>
-              <div className="mt-9">
-                <UploadCTA>
-                  <Upload size={18} strokeWidth={2.5} />
-                  Загрузить воспоминание
-                </UploadCTA>
+      {/* ТАЙМИНГ ВЫПУСКНОГО */}
+      <section className="max-w-3xl mx-auto px-4 my-16">
+        <h2 className="text-3xl font-serif text-[#1a365d] mb-8 text-center">📅 Программа Выпускного</h2>
+        <div className="paper-card p-8">
+          {[
+            { time: "10:00", event: "Торжественная линейка во дворе школы", icon: "🎓" },
+            { time: "12:00", event: "Вручение аттестатов в актовом зале", icon: "📜" },
+            { time: "14:00", event: "Фотосессия классом и семейные фото", icon: "📸" },
+            { time: "17:00", event: "Банкет в ресторане «Небо»", icon: "🥂" },
+            { time: "22:00", event: "Прогулка по набережной. Встреча рассвета", icon: "🌅" },
+          ].map((item, i) => (
+            <div key={i} className="flex gap-4 py-4 border-b border-dashed border-[#cbd5e0] last:border-b-0">
+              <div className="text-3xl">{item.icon}</div>
+              <div className="flex-1">
+                <div className="text-sm font-bold text-[#2c5282]">{item.time}</div>
+                <div className="text-md text-[#2d3748]">{item.event}</div>
               </div>
             </div>
-          </div>
-        </Reveal>
+          ))}
+        </div>
       </section>
-    </div>
+
+      {/* ЛЕНТА ВОСПОМИНАНИЙ */}
+      <section className="max-w-5xl mx-auto px-4 my-16">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-serif text-[#1a365d]">🖼 Наш школьный альбом</h2>
+          <p className="text-sm text-[#718096] mt-2">Моменты, которые останутся с нами навсегда</p>
+        </div>
+
+        {memories.length === 0 ? (
+          <div className="paper-card text-center py-16">
+            <School className="w-12 h-12 text-[#cbd5e0] mx-auto mb-3" />
+            <p className="text-[#718096]">Пока нет фотографий. Будьте первым, кто поделится воспоминанием!</p>
+            <Link href="/gallery" className="inline-block mt-4 text-sm text-[#2c5282] underline">Загрузить фото →</Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {memories.map((m) => (
+              <div key={m.id} className="photo-pin">
+                <img
+                  src={m.filePath}
+                  alt={m.caption || "Воспоминание"}
+                  className="w-full h-48 object-cover"
+                />
+                {m.caption && (
+                  <p className="text-sm text-[#2d3748] mt-3 text-center italic" style={{fontFamily: 'Caveat, cursive'}}>
+                    "{m.caption}"
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* КАПСУЛА ВРЕМЕНИ */}
+      <section className="max-w-4xl mx-auto px-4 my-16">
+        <div className="paper-card p-10 text-center bg-gradient-to-br from-[#fffcf5] to-[#f0f4f8]">
+          <div className="text-5xl mb-4">⏳</div>
+          <h2 className="text-3xl font-serif text-[#1a365d] mb-3">Капсула времени</h2>
+          <p className="text-[#4a5568] max-w-xl mx-auto mb-6">
+            Напиши письмо себе в будущее. Оно откроется ровно через 10 лет — на нашей встрече выпускников в 2037 году.
+          </p>
+          <Link href="/wishes" className="inline-block bg-[#1a365d] hover:bg-[#2c5282] text-white px-8 py-3 rounded-lg font-medium transition-all text-sm">
+            ✉️ Написать письмо
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }
