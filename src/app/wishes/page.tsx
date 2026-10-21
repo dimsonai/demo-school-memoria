@@ -1,7 +1,7 @@
+export const revalidate = 0;
+
 import * as WishesViewModule from "@/components/WishesView";
 import { getWishes } from "@/lib/data";
-
-export const dynamic = "force-dynamic";
 
 const WishesView =
   (WishesViewModule as any).default ||
