@@ -1,7 +1,7 @@
+export const revalidate = 0;
+
 import * as GalleryViewModule from "@/components/GalleryView";
 import * as dataModule from "@/lib/data";
-
-export const dynamic = "force-dynamic";
 
 const GalleryView =
   (GalleryViewModule as any).default ||
