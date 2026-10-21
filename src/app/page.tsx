@@ -1,8 +1,10 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 import Link from "next/link";
 import { GraduationCap, Clock, MapPin, Users, BookOpen, Award, Star, ArrowRight, Camera } from "lucide-react";
-import { Countdown } from "@/components/Countdown";
+import * as CountdownModule from "@/components/Countdown";
+
+const Countdown = (CountdownModule as any).default || (CountdownModule as any).Countdown;
 
 export default async function HomePage() {
   return (
@@ -23,7 +25,7 @@ export default async function HomePage() {
           
           <div className="bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-3xl shadow-xl border-4 border-blue-50 max-w-2xl mx-auto mb-10 transform hover:scale-[1.02] transition-transform">
             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">До выпускного осталось</h3>
-            <Countdown targetDate="2027-06-25T18:00:00" />
+            {Countdown ? <Countdown targetDate="2027-06-25T18:00:00" /> : <div className="text-2xl font-bold text-[#2c5282]">25 Июня 2027</div>}
           </div>
         </div>
       </section>
@@ -49,7 +51,7 @@ export default async function HomePage() {
       {/* Школьная доска (Приветствие) */}
       <section className="max-w-4xl mx-auto px-4 mb-16">
         <div className="bg-[#2d4a22] p-8 md:p-12 rounded-xl shadow-2xl border-[12px] border-[#5c4033] relative">
-          <div className="absolute bottom-4 right-6 w-16 h-4 bg-white/80 rounded-sm transform rotate-6"></div> {/* Мелок */}
+          <div className="absolute bottom-4 right-6 w-16 h-4 bg-white/80 rounded-sm transform rotate-6"></div>
           <h2 className="text-3xl md:text-4xl text-white font-serif mb-6 text-center chalk-text opacity-90">
             Дорогие выпускники!
           </h2>
